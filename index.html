@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康運動指導士向けゲーム - 週間プログラム版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .level-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #f39c12;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .mode-switch {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .mode-btn {
+            padding: 8px 15px;
+            border: 2px solid white;
+            background: transparent;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn.active {
+            background: white;
+            color: #2c3e50;
+        }
+
+        .game-content {
+            display: grid;
+            grid-template-columns: 350px 1fr 400px;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .client-info {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid #3498db;
+        }
+
+        .client-info h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .client-detail {
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .client-detail:last-child {
+            border-bottom: none;
+        }
+
+        /* 日次モード */
+        .daily-mode .exercise-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* 週次モード */
+        .weekly-mode .weekly-planner {
+            display: block;
+        }
+
+        .weekly-planner {
+            display: none;
+        }
+
+        .weekly-calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .day-column {
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            min-height: 400px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .day-column.active {
+            border-color: #3498db;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+        }
+
+        .day-header {
+            background: #3498db;
+            color: white;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .day-exercises {
+            min-height: 300px;
+            position: relative;
+        }
+
+        .day-exercise-item {
+            background: #ecf9f4;
+            border: 1px solid #27ae60;
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .day-exercise-item:hover {
+            background: #d5eddf;
+            transform: translateY(-2px);
+        }
+
+        .day-exercise-item .remove-btn {
+            position: absolute;
+            top: 2px;
+            right: 5px;
+            color: #e74c3c;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .day-time-total {
+            background: #fff;
+            border-radius: 6px;
+            padding: 8px;
+            margin-top: 10px;
+            border-left: 3px solid #3498db;
+            font-size: 0.85rem;
+        }
+
+        .exercise-pool {
+            background: #fff;
+            border-radius: 12px;
+            padding: 15px;
+            border: 2px solid #bdc3c7;
+        }
+
+        .exercise-pool h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .exercise-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .exercise-cards::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .exercise-cards::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .exercise-cards::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 3px;
+        }
+
+        .exercise-card {
+            background: white;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            min-height: 120px;
+        }
+
+        .exercise-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border-color: #3498db;
+        }
+
+        .exercise-card.selected {
+            border-color: #27ae60;
+            background: #ecf9f4;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(39, 174, 96, 0.2);
+        }
+
+        .exercise-name {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .exercise-details {
+            font-size: 0.8rem;
+            color: #e74c3c;
+            margin-bottom: 3px;
+            font-weight: bold;
+        }
+
+        .exercise-type {
+            color: #7f8c8d;
+            font-size: 0.75rem;
+            margin-bottom: 2px;
+        }
+
+        .exercise-intensity {
+            color: #f39c12;
+            font-weight: bold;
+            font-size: 0.75rem;
+        }
+
+        .results-panel {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid #e74c3c;
+        }
+
+        .score-display {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .score-number {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .score-excellent { color: #27ae60; }
+        .score-good { color: #f39c12; }
+        .score-poor { color: #e74c3c; }
+
+        .score-label {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        .weekly-summary {
+            background: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 3px solid #9b59b6;
+        }
+
+        .weekly-summary h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+
+        .selected-exercises {
+            margin-bottom: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .selected-exercises h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .feedback {
+            border-radius: 8px;
+            margin-top: 15px;
+            padding: 15px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .feedback.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .feedback.warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .feedback.danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #219a52;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d68910;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e74c3c, #f39c12, #27ae60);
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .achievements {
+            margin-top: 15px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #ecf0f1;
+        }
+
+        .achievement {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            margin: 2px;
+        }
+
+        .achievement.unlocked {
+            background: #27ae60;
+            animation: bounceIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .rest-day {
+            background: #ffe4e1 !important;
+            border-color: #ffb3ba !important;
+        }
+
+        .rest-day .day-header {
+            background: #ff6b6b !important;
+        }
+
+        @media (max-width: 1200px) {
+            .game-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .weekly-calendar {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .weekly-calendar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .exercise-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="mode-switch">
+                <button class="mode-btn active" onclick="switchMode('daily')">📅 日次</button>
+                <button class="mode-btn" onclick="switchMode('weekly')">📊 週間</button>
+            </div>
+            <div class="level-badge" id="levelBadge">レベル 1</div>
+            <h1>🏃‍♂️ 運動プログラム作成ゲーム（週間プログラム版）</h1>
+            <p>健康運動指導士養成講座 - 週間プログラム作成で実践的トレーニング</p>
+        </div>
+        
+        <div class="game-content daily-mode" id="gameContent">
+            <!-- クライアント情報 -->
+            <div class="client-info">
+                <h3>👤 クライアント情報</h3>
+                <div id="clientDetails">
+                    <!-- JavaScriptで動的生成 -->
+                </div>
+            </div>
+
+            <!-- 運動選択エリア -->
+            <div class="exercise-selection">
+                <!-- 日次モード -->
+                <div class="daily-selection">
+                    <h3 style="text-align: center; margin-bottom: 20px; color: #2c3e50;">🎯 適切な運動を選択してください</h3>
+                    <div class="exercise-cards" id="exerciseCards">
+                        <!-- JavaScriptで動的生成 -->
+                    </div>
+                </div>
+
+                <!-- 週間モード -->
+                <div class="weekly-planner">
+                    <h3 style="text-align: center; margin-bottom: 20px; color: #2c3e50;">📅 週間プログラムを作成してください</h3>
+                    <div class="weekly-calendar" id="weeklyCalendar">
+                        <!-- JavaScriptで動的生成 -->
+                    </div>
+                    <div class="exercise-pool">
+                        <h4>🏃‍♂️ 運動メニュー</h4>
+                        <div class="exercise-cards" id="exercisePool">
+                            <!-- JavaScriptで動的生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 結果表示エリア -->
+            <div class="results-panel">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                
+                <div class="score-display">
+                    <div class="score-number score-poor" id="scoreDisplay">0</div>
+                    <div class="score-label">適合スコア</div>
+                </div>
+
+                <!-- 週間サマリー -->
+                <div class="weekly-summary" id="weeklySummary" style="display: none;">
+                    <h4>📊 週間サマリー</h4>
+                    <div class="summary-item">
+                        <span>総運動時間:</span>
+                        <span id="totalWeeklyTime">0分</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>週間上限:</span>
+                        <span id="weeklyTimeLimit">0分</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>運動日数:</span>
+                        <span id="exerciseDays">0日</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>休息日数:</span>
+                        <span id="restDays">7日</span>
+                    </div>
+                </div>
+
+                <div class="selected-exercises">
+                    <h4 id="exerciseCountHeader">✅ 選択した運動 (<span id="exerciseCount">0</span>)</h4>
+                    <div id="selectedList">
+                        <p style="color: #7f8c8d; font-style: italic;">運動カードをクリックして選択</p>
+                    </div>
+                </div>
+
+                <div id="feedback" class="feedback" style="display: none;">
+                    <!-- フィードバック表示 -->
+                </div>
+
+                <div class="achievements" id="achievements">
+                    <strong>🏆 実績:</strong>
+                    <div id="achievementList">
+                        <!-- 実績バッジ -->
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="generateNewClient()">🔄 新クライアント</button>
+                    <button class="btn btn-success" onclick="evaluateProgram()">📊 評価する</button>
+                    <button class="btn btn-warning" onclick="clearSelections()">🗑️ 全クリア</button>
+                    <button class="btn btn-danger" onclick="restartGame()">🎮 最初から</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 詳細な運動データ
+        const exercises = [
+            // ウォーキング系
+            {
+                id: 1,
+                name: "ウォーキング",
+                details: "10-20分",
+                type: "有酸素運動",
+                intensity: "軽度 ★",
+                suitableFor: ["健康", "膝痛", "高血圧", "糖尿病", "高齢者", "心疾患"],
+                unsuitable: [],
+                points: 15,
+                mets: 3,
+                duration: 15
+            },
+            {
+                id: 2,
+                name: "ウォーキング",
+                details: "30-45分",
+                type: "有酸素運動",
+                intensity: "中等度 ★★",
+                suitableFor: ["健康", "膝痛", "高血圧", "糖尿病"],
+                unsuitable: ["重度心疾患"],
+                points: 25,
+                mets: 3,
+                duration: 37.5
+            },
+            {
+                id: 3,
+                name: "ウォーキング",
+                details: "60分以上",
+                type: "有酸素運動",
+                intensity: "高強度 ★★★",
+                suitableFor: ["健康", "若年"],
+                unsuitable: ["膝痛", "高齢者", "心疾患"],
+                points: 30,
+                mets: 3,
+                duration: 60
+            },
+            {
+                id: 4,
+                name: "軽いジョギング",
+                details: "10-15分",
+                type: "有酸素運動",
+                intensity: "中等度 ★★",
+                suitableFor: ["健康", "若年"],
+                unsuitable: ["膝痛", "高血圧", "高齢者", "心疾患"],
+                points: 25,
+                mets: 6,
+                duration: 12.5
+            },
+            {
+                id: 5,
+                name: "ジョギング",
+                details: "20-30分",
+                type: "有酸素運動",
+                intensity: "高強度 ★★★",
+                suitableFor: ["健康", "若年"],
+                unsuitable: ["膝痛", "高血圧", "高齢者", "心疾患"],
+                points: 35,
+                mets: 7,
+                duration: 25
+            },
+            {
+                id: 6,
+                name: "水中歩行",
+                details: "20-30分",
+                type: "有酸素運動",
+                intensity: "軽度 ★",
+                suitableFor: ["健康", "膝痛", "関節炎", "高齢者"],
+                unsuitable: [],
+                points: 20,
+                mets: 4,
+                duration: 25
+            },
+            {
+                id: 7,
+                name: "水中歩行",
+                details: "45-60分",
+                type: "有酸素運動",
+                intensity: "中等度 ★★",
+                suitableFor: ["健康", "膝痛", "関節炎"],
+                unsuitable: [],
+                points: 30,
+                mets: 4,
+                duration: 52.5
+            },
+            {
+                id: 8,
+                name: "スクワット",
+                details: "10-20回",
+                type: "筋力トレーニング",
+                intensity: "軽度 ★",
+                suitableFor: ["健康"],
+                unsuitable: ["膝痛", "腰痛", "高齢者"],
+                points: 15,
+                mets: 5,
+                duration: 5
+            },
+            {
+                id: 9,
+                name: "スクワット",
+                details: "30-50回",
+                type: "筋力トレーニング",
+                intensity: "中等度 ★★",
+                suitableFor: ["健康", "若年"],
+                unsuitable: ["膝痛", "腰痛", "高齢者"],
+                points: 25,
+                mets: 5,
+                duration: 8
+            },
+            {
+                id: 10,
+                name: "椅子スクワット",
+                details: "10-15回",
+                type: "筋力トレーニング",
+                intensity: "軽度 ★",
+                suitableFor: ["健康", "膝痛", "高齢者"],
+                unsuitable: [],
+                points: 15,
+                mets: 3,
+                duration: 5
+            },
+            {
+                id: 11,
+                name: "椅子スクワット",
+                details: "20-30回",
+                type: "筋力トレーニング",
+                intensity: "中等度 ★★",
+                suitableFor: ["健康", "膝痛"],
+                unsuitable: [],
+                points: 20,
+                mets: 3,
+                duration: 8
+            },
+            {
+                id: 12,
+                name: "軽いストレッチ",
+                details: "10分",
+                type: "柔軟性運動",
+                intensity: "軽度 ★",
+                suitableFor: ["健康", "膝痛", "高血圧", "糖尿病", "高齢者", "心疾患"],
+                unsuitable: [],
+                points: 10,
+                mets: 2,
+                duration: 10
+            },
+            {
+                id: 13,
+                name: "全身ストレッチ",
+                details: "20-30分",
+                type: "柔軟性運動",
+                intensity: "軽度 ★",
+                suitableFor: ["健康", "膝痛", "高血圧", "糖尿病", "高齢者", "心疾患"],
+                unsuitable: [],
+                points: 20,
+                mets: 2,
+                duration: 25
+            },
+            {
+                id: 14,
+                name: "軽い筋トレ",
+                details: "15分",
+                type: "筋力トレーニング",
+                intensity: "軽度 ★",
+                suitableFor: ["健康", "高齢者"],
+                unsuitable: ["急性疾患"],
+                points: 15,
+                mets: 3,
+                duration: 15
+            },
+            {
+                id: 15,
+                name: "中程度筋トレ",
+                details: "30分",
+                type: "筋力トレーニング",
+                intensity: "中等度 ★★",
+                suitableFor: ["健康", "若年"],
+                unsuitable: ["高齢者", "急性疾患"],
+                points: 25,
+                mets: 5,
+                duration: 30
+            },
+            {
+                id: 16,
+                name: "腕立て伏せ",
+                details: "10-20回",
+                type: "筋力トレーニング",
+                intensity: "中等度 ★★",
+                suitableFor: ["健康", "若年"],
+                unsuitable: ["腰痛", "高齢者"],
+                points: 20,
+                mets: 4,
+                duration: 5
+            },
+            {
+                id: 17,
+                name: "膝つき腕立て",
+                details: "10-15回",
+                type: "筋力トレーニング",
+                intensity: "軽度 ★",
+                suitableFor: ["健康", "高齢者"],
+                unsuitable: ["腰痛"],
+                points: 15,
+                mets: 3,
+                duration: 5
+            },
+            {
+                id: 18,
+                name: "自転車",
+                details: "20-30分",
+                type: "有酸素運動",
+                intensity: "中等度 ★★",
+                suitableFor: ["健康", "膝痛"],
+                unsuitable: ["重度心疾患"],
+                points: 25,
+                mets: 6,
+                duration: 25
+            },
+            {
+                id: 19,
+                name: "自転車",
+                details: "45-60分",
+                type: "有酸素運動",
+                intensity: "高強度 ★★★",
+                suitableFor: ["健康", "若年"],
+                unsuitable: ["膝痛", "心疾患", "高齢者"],
+                points: 35,
+                mets: 6,
+                duration: 52.5
+            },
+            {
+                id: 20,
+                name: "バランス練習",
+                details: "10-15分",
+                type: "バランス運動",
+                intensity: "軽度 ★",
+                suitableFor: ["健康", "高齢者", "膝痛"],
+                unsuitable: [],
+                points: 15,
+                mets: 2,
+                duration: 12.5
+            },
+            {
+                id: 21,
+                name: "体幹トレーニング",
+                details: "15分",
+                type: "筋力トレーニング",
+                intensity: "中等度 ★★",
+                suitableFor: ["健康", "若年"],
+                unsuitable: ["腰痛", "高齢者"],
+                points: 20,
+                mets: 4,
+                duration: 15
+            },
+            {
+                id: 22,
+                name: "階段昇降",
+                details: "5-10分",
+                type: "有酸素運動",
+                intensity: "中等度 ★★",
+                suitableFor: ["健康"],
+                unsuitable: ["膝痛", "高齢者", "心疾患"],
+                points: 20,
+                mets: 8,
+                duration: 7.5
+            },
+            {
+                id: 23,
+                name: "階段昇降",
+                details: "15-20分",
+                type: "有酸素運動",
+                intensity: "高強度 ★★★",
+                suitableFor: ["健康", "若年"],
+                unsuitable: ["膝痛", "高齢者", "心疾患", "高血圧"],
+                points: 30,
+                mets: 8,
+                duration: 17.5
+            },
+            {
+                id: 24,
+                name: "軽いダンス",
+                details: "20分",
+                type: "有酸素運動",
+                intensity: "中等度 ★★",
+                suitableFor: ["健康"],
+                unsuitable: ["膝痛", "高齢者"],
+                points: 25,
+                mets: 5,
+                duration: 20
+            }
+        ];
+
+        const clientProfiles = [
+            {
+                name: "田中さん", age: 65, gender: "男性", 
+                goal: "健康維持", condition: "膝痛", fitness: "低", category: "高齢者",
+                notes: "定年退職後、健康を保ちたい",
+                dailyTimeLimit: 40, weeklyTimeLimit: 180,
+                metsLimit: 15
+            },
+            {
+                name: "佐藤さん", age: 45, gender: "女性", 
+                goal: "減量", condition: "健康", fitness: "中", category: "若年",
+                notes: "忙しい中でも効率的に運動したい",
+                dailyTimeLimit: 60, weeklyTimeLimit: 300,
+                metsLimit: 23
+            },
+            {
+                name: "山田さん", age: 70, gender: "男性", 
+                goal: "筋力向上", condition: "高血圧", fitness: "低", category: "高齢者",
+                notes: "血圧管理をしながら筋力をつけたい",
+                dailyTimeLimit: 30, weeklyTimeLimit: 150,
+                metsLimit: 12
+            },
+            {
+                name: "鈴木さん", age: 55, gender: "女性", 
+                goal: "リハビリ", condition: "関節炎", fitness: "低", category: "高齢者",
+                notes: "関節に負担をかけずに動きたい",
+                dailyTimeLimit: 30, weeklyTimeLimit: 120,
+                metsLimit: 10
+            },
+            {
+                name: "高橋さん", age: 38, gender: "男性", 
+                goal: "体力向上", condition: "健康", fitness: "中", category: "若年",
+                notes: "スポーツのパフォーマンスを上げたい",
+                dailyTimeLimit: 90, weeklyTimeLimit: 420,
+                metsLimit: 30
+            },
+            {
+                name: "伊藤さん", age: 62, gender: "女性", 
+                goal: "健康維持", condition: "糖尿病", fitness: "中", category: "高齢者",
+                notes: "血糖値管理のため運動を続けたい",
+                dailyTimeLimit: 45, weeklyTimeLimit: 200,
+                metsLimit: 18
+            },
+            {
+                name: "渡辺さん", age: 50, gender: "男性", 
+                goal: "減量", condition: "高血圧", fitness: "低", category: "若年",
+                notes: "メタボ改善のため運動を始めたい",
+                dailyTimeLimit: 45, weeklyTimeLimit: 240,
+                metsLimit: 20
+            },
+            {
+                name: "中村さん", age: 28, gender: "女性", 
+                goal: "筋力向上", condition: "健康", fitness: "高", category: "若年",
+                notes: "筋肉をつけて代謝を上げたい",
+                dailyTimeLimit: 120, weeklyTimeLimit: 480,
+                metsLimit: 35
+            }
+        ];
+
+        // ゲーム状態
+        let currentClient = {};
+        let selectedExercises = []; // 日次モード用
+        let weeklyProgram = { // 週間モード用
+            Monday: [], Tuesday: [], Wednesday: [], Thursday: [], 
+            Friday: [], Saturday: [], Sunday: []
+        };
+        let currentScore = 0;
+        let totalClients = 0;
+        let level = 1;
+        let achievements = [];
+        let currentMode = 'daily'; // 'daily' or 'weekly'
+        let selectedDay = null;
+
+        const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        const dayDisplayNames = ['月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日'];
+
+        // モード切り替え
+        function switchMode(mode) {
+            currentMode = mode;
+            const gameContent = document.getElementById('gameContent');
+            const modeBtns = document.querySelectorAll('.mode-btn');
+            
+            modeBtns.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (mode === 'daily') {
+                gameContent.className = 'game-content daily-mode';
+                selectedExercises = [];
+                document.getElementById('weeklySummary').style.display = 'none';
+                document.getElementById('exerciseCountHeader').innerHTML = '✅ 選択した運動 (<span id="exerciseCount">0</span>)';
+            } else {
+                gameContent.className = 'game-content weekly-mode';
+                clearWeeklyProgram();
+                document.getElementById('weeklySummary').style.display = 'block';
+                document.getElementById('exerciseCountHeader').innerHTML = '📅 週間プログラム';
+                renderWeeklyCalendar();
+                renderExercisePool();
+            }
+            
+            calculateScore();
+            updateDisplay();
+            renderExerciseCards();
+        }
+
+        // ゲーム初期化
+        function initGame() {
+            generateNewClient();
+            renderExerciseCards();
+            updateDisplay();
+            updateAchievements();
+        }
+
+        // 新しいクライアント生成
+        function generateNewClient() {
+            currentClient = {...clientProfiles[Math.floor(Math.random() * clientProfiles.length)]};
+            selectedExercises = [];
+            clearWeeklyProgram();
+            currentScore = 0;
+            totalClients++;
+            
+            updateClientDisplay();
+            updateDisplay();
+            renderExerciseCards();
+            if (currentMode === 'weekly') {
+                renderWeeklyCalendar();
+                renderExercisePool();
+            }
+            
+            document.getElementById('feedback').style.display = 'none';
+        }
+
+        // クライアント情報表示更新
+        function updateClientDisplay() {
+            const details = document.getElementById('clientDetails');
+            details.innerHTML = `
+                <div class="client-detail"><strong>名前:</strong> ${currentClient.name}</div>
+                <div class="client-detail"><strong>年齢:</strong> ${currentClient.age}歳 (${currentClient.gender})</div>
+                <div class="client-detail"><strong>目標:</strong> ${currentClient.goal}</div>
+                <div class="client-detail"><strong>健康状態:</strong> ${currentClient.condition}</div>
+                <div class="client-detail"><strong>体力:</strong> ${currentClient.fitness}程度</div>
+                <div class="client-detail"><strong>備考:</strong> ${currentClient.notes}</div>
+                <div class="client-detail" style="color: #e74c3c;"><strong>⚠️ 運動時間上限:</strong> ${currentClient.dailyTimeLimit}分/日</div>
+                <div class="client-detail" style="color: #e74c3c;"><strong>📅 週間上限:</strong> ${currentClient.weeklyTimeLimit}分/週</div>
+            `;
+        }
+
+        // 週間プログラムクリア
+        function clearWeeklyProgram() {
+            weeklyProgram = {
+                Monday: [], Tuesday: [], Wednesday: [], Thursday: [], 
+                Friday: [], Saturday: [], Sunday: []
+            };
+        }
+
+        // 週間カレンダー表示
+        function renderWeeklyCalendar() {
+            const container = document.getElementById('weeklyCalendar');
+            container.innerHTML = '';
+
+            dayNames.forEach((day, index) => {
+                const dayColumn = document.createElement('div');
+                dayColumn.className = 'day-column';
+                dayColumn.onclick = () => selectDay(day);
+                
+                dayColumn.innerHTML = `
+                    <div class="day-header">${dayDisplayNames[index]}</div>
+                    <div class="day-exercises" id="day-${day}">
+                        ${renderDayExercises(day)}
+                    </div>
+                    <div class="day-time-total">
+                        <strong>時間: ${calculateDayTime(day)}分</strong><br>
+                        <small>上限: ${currentClient.dailyTimeLimit}分</small>
+                    </div>
+                `;
+                
+                container.appendChild(dayColumn);
+            });
+        }
+
+        function selectDay(day) {
+            selectedDay = day;
+            const dayColumns = document.querySelectorAll('.day-column');
+            dayColumns.forEach(col => col.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        function renderDayExercises(day) {
+            const exercises = weeklyProgram[day];
+            if (exercises.length === 0) {
+                return '<p style="color: #7f8c8d; font-style: italic; text-align: center; margin-top: 50px;">運動なし<br>（休息日）</p>';
+            }
+            
+            return exercises.map(exercise => `
+                <div class="day-exercise-item" onclick="removeFromDay('${day}', ${exercise.id})">
+                    <strong>${exercise.name}</strong><br>
+                    <small>${exercise.details} (${exercise.duration}分)</small>
+                    <span class="remove-btn">✕</span>
+                </div>
+            `).join('');
+        }
+
+        function calculateDayTime(day) {
+            return weeklyProgram[day].reduce((total, exercise) => total + exercise.duration, 0);
+        }
+
+        function addToDay(exercise) {
+            if (!selectedDay) {
+                alert('運動を追加する曜日を選択してください');
+                return;
+            }
+            
+            const dayTime = calculateDayTime(selectedDay);
+            if (dayTime + exercise.duration > currentClient.dailyTimeLimit) {
+                alert(`${dayDisplayNames[dayNames.indexOf(selectedDay)]}の時間上限を超過します`);
+                return;
+            }
+            
+            weeklyProgram[selectedDay].push(exercise);
+            renderWeeklyCalendar();
+            calculateScore();
+            updateDisplay();
+        }
+
+        function removeFromDay(day, exerciseId) {
+            weeklyProgram[day] = weeklyProgram[day].filter(ex => ex.id !== exerciseId);
+            renderWeeklyCalendar();
+            calculateScore();
+            updateDisplay();
+        }
+
+        // 運動プール表示
+        function renderExercisePool() {
+            const container = document.getElementById('exercisePool');
+            container.innerHTML = '';
+
+            exercises.forEach(exercise => {
+                const card = document.createElement('div');
+                card.className = 'exercise-card';
+                
+                card.innerHTML = `
+                    <div class="exercise-name">${exercise.name}</div>
+                    <div class="exercise-details">${exercise.details}</div>
+                    <div class="exercise-type">${exercise.type}</div>
+                    <div class="exercise-intensity">${exercise.intensity}</div>
+                `;
+
+                card.onclick = () => addToDay(exercise);
+                container.appendChild(card);
+            });
+        }
+
+        // 運動カード表示（日次モード）
+        function renderExerciseCards() {
+            if (currentMode === 'weekly') return;
+            
+            const container = document.getElementById('exerciseCards');
+            container.innerHTML = '';
+
+            exercises.forEach(exercise => {
+                const card = document.createElement('div');
+                card.className = 'exercise-card';
+                
+                const isSelected = selectedExercises.some(ex => ex.id === exercise.id);
+                if (isSelected) {
+                    card.classList.add('selected');
+                }
+
+                card.innerHTML = `
+                    <div class="exercise-name">${exercise.name}</div>
+                    <div class="exercise-details">${exercise.details}</div>
+                    <div class="exercise-type">${exercise.type}</div>
+                    <div class="exercise-intensity">${exercise.intensity}</div>
+                `;
+
+                card.onclick = () => toggleExercise(exercise);
+                container.appendChild(card);
+            });
+        }
+
+        // 運動の適合性チェック
+        function checkSuitability(exercise, client) {
+            for (let condition of exercise.unsuitable) {
+                if (client.condition === condition || client.category === condition) {
+                    return false;
+                }
+            }
+            
+            if (client.fitness === "低" && exercise.intensity.includes("★★★")) {
+                return false;
+            }
+            
+            return exercise.suitableFor.includes(client.condition) || 
+                   exercise.suitableFor.includes(client.category) ||
+                   exercise.suitableFor.includes("健康");
+        }
+
+        // 運動選択切り替え（日次モード）
+        function toggleExercise(exercise) {
+            if (currentMode === 'weekly') return;
+            
+            const index = selectedExercises.findIndex(ex => ex.id === exercise.id);
+            
+            if (index > -1) {
+                selectedExercises.splice(index, 1);
+            } else {
+                selectedExercises.push(exercise);
+            }
+            
+            calculateScore();
+            updateDisplay();
+            renderExerciseCards();
+            
+            if (index === -1) {
+                playSelectEffect();
+            }
+        }
+
+        // 選択した運動を個別削除
+        function removeExercise(exerciseId) {
+            selectedExercises = selectedExercises.filter(ex => ex.id !== exerciseId);
+            calculateScore();
+            updateDisplay();
+            renderExerciseCards();
+        }
+
+        // スコア計算
+        function calculateScore() {
+            let score = 0;
+            let exerciseList = [];
+            
+            if (currentMode === 'daily') {
+                exerciseList = selectedExercises;
+            } else {
+                // 週間モードでは全ての運動をリストに追加
+                exerciseList = Object.values(weeklyProgram).flat();
+            }
+            
+            let suitableCount = 0;
+            let typeBalance = [];
+            
+            exerciseList.forEach(exercise => {
+                if (checkSuitability(exercise, currentClient)) {
+                    score += exercise.points;
+                    suitableCount++;
+                    
+                    // 目標ボーナス
+                    if (currentClient.goal === "減量" && exercise.type === "有酸素運動") {
+                        score += 10;
+                    } else if (currentClient.goal === "筋力向上" && exercise.type === "筋力トレーニング") {
+                        score += 10;
+                    } else if (currentClient.goal === "リハビリ" && (exercise.type === "柔軟性運動" || exercise.type === "バランス運動")) {
+                        score += 15;
+                    }
+                    
+                    if (currentClient.category === "高齢者" && exercise.intensity.includes("★")) {
+                        score += 5;
+                    }
+                    if (currentClient.fitness === "高" && exercise.intensity.includes("★★★")) {
+                        score += 5;
+                    }
+                } else {
+                    score -= 20;
+                }
+                
+                if (!typeBalance.includes(exercise.type)) {
+                    typeBalance.push(exercise.type);
+                }
+            });
+
+            // バランスボーナス
+            if (typeBalance.length >= 2) {
+                score += 15;
+            }
+            if (typeBalance.length >= 3) {
+                score += 15;
+            }
+            
+            // 時間制限チェック
+            if (currentMode === 'daily') {
+                const totalTime = selectedExercises.reduce((total, ex) => total + ex.duration, 0);
+                if (totalTime > currentClient.dailyTimeLimit) {
+                    score -= 30;
+                } else if (totalTime > currentClient.dailyTimeLimit * 0.8) {
+                    score -= 10;
+                }
+            } else {
+                // 週間モード特有のボーナス・ペナルティ
+                const totalWeeklyTime = Object.values(weeklyProgram).flat().reduce((total, ex) => total + ex.duration, 0);
+                const exerciseDays = Object.values(weeklyProgram).filter(day => day.length > 0).length;
+                const restDays = 7 - exerciseDays;
+                
+                // 週間時間上限チェック
+                if (totalWeeklyTime > currentClient.weeklyTimeLimit) {
+                    score -= 40;
+                } else if (totalWeeklyTime > currentClient.weeklyTimeLimit * 0.8) {
+                    score -= 15;
+                }
+                
+                // 適切な休息日ボーナス
+                if (restDays >= 1 && restDays <= 3) {
+                    score += 20;
+                } else if (restDays === 0) {
+                    score -= 25; // 休息日なしペナルティ
+                } else if (restDays > 4) {
+                    score -= 10; // 運動不足ペナルティ
+                }
+                
+                // 週間継続性ボーナス
+                if (exerciseDays >= 3) {
+                    score += 15;
+                }
+                
+                // 日別時間上限チェック
+                let dailyOverage = 0;
+                Object.keys(weeklyProgram).forEach(day => {
+                    const dayTime = calculateDayTime(day);
+                    if (dayTime > currentClient.dailyTimeLimit) {
+                        dailyOverage++;
+                    }
+                });
+                if (dailyOverage > 0) {
+                    score -= dailyOverage * 15;
+                }
+            }
+
+            currentScore = Math.max(0, score);
+        }
+
+        // 表示更新
+        function updateDisplay() {
+            // スコア表示
+            const scoreElement = document.getElementById('scoreDisplay');
+            scoreElement.textContent = currentScore;
+            
+            scoreElement.className = 'score-number ';
+            if (currentScore >= 80) {
+                scoreElement.className += 'score-excellent';
+            } else if (currentScore >= 50) {
+                scoreElement.className += 'score-good';
+            } else {
+                scoreElement.className += 'score-poor';
+            }
+
+            // プログレスバー
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = Math.min(currentScore, 100) + '%';
+
+            if (currentMode === 'daily') {
+                updateDailyDisplay();
+            } else {
+                updateWeeklyDisplay();
+            }
+
+            // レベル更新
+            level = Math.floor(totalClients / 3) + 1;
+            document.getElementById('levelBadge').textContent = `レベル ${level}`;
+        }
+
+        function updateDailyDisplay() {
+            const selectedList = document.getElementById('selectedList');
+            const exerciseCount = document.getElementById('exerciseCount');
+            exerciseCount.textContent = selectedExercises.length;
+            
+            if (selectedExercises.length === 0) {
+                selectedList.innerHTML = '<p style="color: #7f8c8d; font-style: italic;">運動カードをクリックして選択</p>';
+            } else {
+                const totalTime = selectedExercises.reduce((total, ex) => total + ex.duration, 0);
+                const timeColor = totalTime > currentClient.dailyTimeLimit ? '#e74c3c' : '#27ae60';
+                
+                let timeDisplay = `<div style="background: #f8f9fa; padding: 8px; margin-bottom: 10px; border-radius: 6px; border-left: 3px solid ${timeColor};">
+                                     <strong>⏱️ 総運動時間: ${Math.round(totalTime)}分 / ${currentClient.dailyTimeLimit}分</strong>
+                                   </div>`;
+                
+                selectedList.innerHTML = timeDisplay + selectedExercises.map(exercise => {
+                    const suitable = checkSuitability(exercise, currentClient);
+                    const bgColor = suitable ? '#ecf9f4' : '#f8d7da';
+                    const borderColor = suitable ? '#27ae60' : '#e74c3c';
+                    const icon = suitable ? '✓' : '⚠️';
+                    
+                    return `<div class="selected-exercise" style="background: ${bgColor}; border-left-color: ${borderColor}; padding: 6px 10px; margin: 3px 0; border-radius: 6px; border-left: 3px solid ${borderColor}; position: relative; cursor: pointer; transition: all 0.3s ease; font-size: 0.85rem;" 
+                                 onclick="removeExercise(${exercise.id})">
+                                ${icon} ${exercise.name} ${exercise.details} (${exercise.duration}分)
+                                <span style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); color: #e74c3c; font-weight: bold; opacity: 0.7;">✕</span>
+                            </div>`;
+                }).join('');
+            }
+        }
+
+        function updateWeeklyDisplay() {
+            const totalWeeklyTime = Object.values(weeklyProgram).flat().reduce((total, ex) => total + ex.duration, 0);
+            const exerciseDays = Object.values(weeklyProgram).filter(day => day.length > 0).length;
+            const restDays = 7 - exerciseDays;
+            
+            // 週間サマリー更新
+            document.getElementById('totalWeeklyTime').textContent = `${totalWeeklyTime}分`;
+            document.getElementById('weeklyTimeLimit').textContent = `${currentClient.weeklyTimeLimit}分`;
+            document.getElementById('exerciseDays').textContent = `${exerciseDays}日`;
+            document.getElementById('restDays').textContent = `${restDays}日`;
+            
+            // 選択リスト更新
+            const selectedList = document.getElementById('selectedList');
+            const allExercises = Object.values(weeklyProgram).flat();
+            
+            if (allExercises.length === 0) {
+                selectedList.innerHTML = '<p style="color: #7f8c8d; font-style: italic;">曜日を選択して運動を追加してください</p>';
+            } else {
+                const timeColor = totalWeeklyTime > currentClient.weeklyTimeLimit ? '#e74c3c' : '#27ae60';
+                
+                let programDisplay = `<div style="background: #f8f9fa; padding: 8px; margin-bottom: 10px; border-radius: 6px; border-left: 3px solid ${timeColor};">
+                                        <strong>📊 週間合計: ${totalWeeklyTime}分 / ${currentClient.weeklyTimeLimit}分</strong><br>
+                                        <small>運動日: ${exerciseDays}日 | 休息日: ${restDays}日</small>
+                                      </div>`;
+                
+                Object.keys(weeklyProgram).forEach((day, index) => {
+                    if (weeklyProgram[day].length > 0) {
+                        const dayTime = calculateDayTime(day);
+                        const dayColor = dayTime > currentClient.dailyTimeLimit ? '#e74c3c' : '#3498db';
+                        
+                        programDisplay += `<div style="background: #fff; padding: 8px; margin: 5px 0; border-radius: 6px; border-left: 3px solid ${dayColor};">
+                                            <strong>${dayDisplayNames[index]} (${dayTime}分)</strong><br>
+                                            ${weeklyProgram[day].map(ex => `<small>• ${ex.name} ${ex.details}</small>`).join('<br>')}
+                                          </div>`;
+                    }
+                });
+                
+                selectedList.innerHTML = programDisplay;
+            }
+        }
+
+        // 全選択クリア
+        function clearSelections() {
+            if (currentMode === 'daily') {
+                selectedExercises = [];
+                renderExerciseCards();
+            } else {
+                clearWeeklyProgram();
+                renderWeeklyCalendar();
+            }
+            currentScore = 0;
+            updateDisplay();
+            document.getElementById('feedback').style.display = 'none';
+        }
+
+        // ゲーム再スタート
+        function restartGame() {
+            if (confirm('ゲームを最初からやり直しますか？')) {
+                selectedExercises = [];
+                clearWeeklyProgram();
+                currentScore = 0;
+                totalClients = 0;
+                level = 1;
+                achievements = [];
+                generateNewClient();
+                updateAchievements();
+            }
+        }
+
+        // プログラム評価
+        function evaluateProgram() {
+            let feedback = '';
+            let feedbackClass = '';
+            
+            const exerciseList = currentMode === 'daily' ? selectedExercises : Object.values(weeklyProgram).flat();
+            
+            if (exerciseList.length === 0) {
+                feedback = '❌ 運動が選択されていません。<br>適切な運動を選択してください。';
+                feedbackClass = 'danger';
+            } else {
+                const suitableCount = exerciseList.filter(ex => checkSuitability(ex, currentClient)).length;
+                const unsuitableCount = exerciseList.length - suitableCount;
+                const types = [...new Set(exerciseList.map(ex => ex.type))];
+                
+                if (currentMode === 'daily') {
+                    const totalTime = selectedExercises.reduce((total, ex) => total + ex.duration, 0);
+                    
+                    if (currentScore >= 80) {
+                        feedback = `🎉 素晴らしい！完璧な運動プログラムです！<br>
+                                   <strong>スコア: ${currentScore}点</strong><br>
+                                   適切な運動: ${suitableCount}個、不適切: ${unsuitableCount}個<br>
+                                   運動種類: ${types.length}種類<br>
+                                   総運動時間: ${Math.round(totalTime)}分（上限: ${currentClient.dailyTimeLimit}分）`;
+                        feedbackClass = 'success';
+                    } else if (currentScore >= 50) {
+                        feedback = `👍 良い判断です！改善の余地があります。<br>
+                                   <strong>スコア: ${currentScore}点</strong><br>
+                                   総運動時間: ${Math.round(totalTime)}分（上限: ${currentClient.dailyTimeLimit}分）`;
+                        feedbackClass = 'warning';
+                    } else {
+                        feedback = `⚠️ 要改善！クライアントの安全を再確認してください。<br>
+                                   <strong>スコア: ${currentScore}点</strong>`;
+                        feedbackClass = 'danger';
+                    }
+                } else {
+                    // 週間モード評価
+                    const totalWeeklyTime = Object.values(weeklyProgram).flat().reduce((total, ex) => total + ex.duration, 0);
+                    const exerciseDays = Object.values(weeklyProgram).filter(day => day.length > 0).length;
+                    const restDays = 7 - exerciseDays;
+                    
+                    if (currentScore >= 80) {
+                        feedback = `🎉 素晴らしい！完璧な週間プログラムです！<br>
+                                   <strong>スコア: ${currentScore}点</strong><br>
+                                   適切な運動: ${suitableCount}個、不適切: ${unsuitableCount}個<br>
+                                   運動種類: ${types.length}種類<br>
+                                   週間合計時間: ${totalWeeklyTime}分（上限: ${currentClient.weeklyTimeLimit}分）<br>
+                                   運動日数: ${exerciseDays}日、休息日数: ${restDays}日<br>
+                                   週間バランスが非常に良好です！`;
+                        feedbackClass = 'success';
+                        checkAchievements('weeklyPerfect');
+                    } else if (currentScore >= 50) {
+                        feedback = `👍 良い週間プログラムです！改善の余地があります。<br>
+                                   <strong>スコア: ${currentScore}点</strong><br>
+                                   週間合計時間: ${totalWeeklyTime}分（上限: ${currentClient.weeklyTimeLimit}分）<br>
+                                   運動日数: ${exerciseDays}日、休息日数: ${restDays}日`;
+                        feedbackClass = 'warning';
+                    } else {
+                        feedback = `⚠️ 要改善！週間プログラムを見直してください。<br>
+                                   <strong>スコア: ${currentScore}点</strong><br>
+                                   ${restDays === 0 ? '⚠️ 休息日が不足しています。<br>' : ''}
+                                   ${totalWeeklyTime > currentClient.weeklyTimeLimit ? '⚠️ 週間時間上限を超過しています。<br>' : ''}`;
+                        feedbackClass = 'danger';
+                    }
+                }
+                
+                if (currentScore >= 80) {
+                    checkAchievements('perfect');
+                    if (currentScore >= 100) showConfetti();
+                }
+            }
+
+            const feedbackElement = document.getElementById('feedback');
+            feedbackElement.innerHTML = feedback;
+            feedbackElement.className = `feedback ${feedbackClass}`;
+            feedbackElement.style.display = 'block';
+            
+            checkAchievements('evaluate');
+            updateAchievements();
+        }
+
+        // 実績チェック
+        function checkAchievements(action) {
+            if (action === 'perfect' && currentScore >= 80 && !achievements.includes('perfect')) {
+                achievements.push('perfect');
+            }
+            if (action === 'weeklyPerfect' && currentScore >= 80 && currentMode === 'weekly' && !achievements.includes('weeklyMaster')) {
+                achievements.push('weeklyMaster');
+            }
+            if (totalClients >= 5 && !achievements.includes('experienced')) {
+                achievements.push('experienced');
+            }
+            if (action === 'evaluate' && !achievements.includes('evaluator')) {
+                achievements.push('evaluator');
+            }
+            if (currentScore >= 100 && !achievements.includes('master')) {
+                achievements.push('master');
+            }
+            
+            // 週間モード特有の実績
+            if (currentMode === 'weekly') {
+                const exerciseDays = Object.values(weeklyProgram).filter(day => day.length > 0).length;
+                const restDays = 7 - exerciseDays;
+                
+                if (restDays >= 1 && restDays <= 3 && exerciseDays >= 3 && !achievements.includes('balancer')) {
+                    achievements.push('balancer');
+                }
+                
+                const types = [...new Set(Object.values(weeklyProgram).flat().map(ex => ex.type))];
+                if (types.length >= 4 && !achievements.includes('variety')) {
+                    achievements.push('variety');
+                }
+            }
+        }
+
+        // 実績表示更新
+        function updateAchievements() {
+            const achievementList = document.getElementById('achievementList');
+            const allAchievements = [
+                { id: 'evaluator', name: '評価マスター', desc: '初回評価完了' },
+                { id: 'perfect', name: '完璧主義者', desc: '80点以上達成' },
+                { id: 'master', name: '指導のプロ', desc: '100点達成' },
+                { id: 'weeklyMaster', name: '週間プランナー', desc: '週間で80点以上' },
+                { id: 'balancer', name: '理想的バランス', desc: '適切な運動・休息比' },
+                { id: 'variety', name: '多様性マスター', desc: '4種類以上の運動' },
+                { id: 'experienced', name: '経験豊富', desc: '5人以上指導' }
+            ];
+
+            achievementList.innerHTML = allAchievements.map(ach => {
+                const unlocked = achievements.includes(ach.id);
+                return `<span class="achievement ${unlocked ? 'unlocked' : ''}" title="${ach.desc}">
+                          ${unlocked ? '🏆' : '🔒'} ${ach.name}
+                        </span>`;
+            }).join('');
+        }
+
+        // 視覚効果
+        function playSelectEffect() {
+            document.body.style.backgroundColor = '#f8f9fa';
+            setTimeout(() => {
+                document.body.style.backgroundColor = '';
+            }, 100);
+        }
+
+        // 紙吹雪効果
+        function showConfetti() {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.innerHTML = '🎉'.repeat(20);
+            confetti.style.fontSize = '2rem';
+            confetti.style.animation = 'slideIn 2s ease';
+            document.body.appendChild(confetti);
+            
+            setTimeout(() => {
+                document.body.removeChild(confetti);
+            }, 2000);
+        }
+
+        // ゲーム開始
+        window.onload = initGame;
+    </script>
+</body>
+</html>
